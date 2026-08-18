@@ -168,8 +168,14 @@ img {
 }
 
 @keyframes langFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .lang-option {
@@ -183,7 +189,9 @@ img {
   font-weight: 500;
   color: var(--text);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .lang-option:hover {
@@ -653,7 +661,9 @@ img {
   font-family: inherit;
   color: var(--text);
   background: rgba(255, 255, 255, 0.8);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .form-input:focus {
@@ -780,7 +790,9 @@ img {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   width: 100%;
   box-shadow: 0 12px 18px rgba(13, 126, 125, 0.16);
 }
@@ -1229,7 +1241,9 @@ img {
   color: var(--text);
   background: var(--card-bg);
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .secondary-btn:hover:not(:disabled) {
@@ -2514,7 +2528,7 @@ img {
   background: var(--card-bg, #fff);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .worker-profile-header {
@@ -2981,7 +2995,7 @@ img {
 }
 
 .table-mono {
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
   font-size: 0.82rem;
   color: var(--muted);
 }
@@ -3859,7 +3873,9 @@ img {
   display: grid;
   place-items: center;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .doc-action-btn:hover {
@@ -3880,7 +3896,9 @@ img {
   padding: 28px 16px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .documents-dropzone:hover,
@@ -3915,6 +3933,105 @@ img {
   font-size: 0.88rem;
   color: var(--text);
   font-weight: 500;
+}
+
+/* Clinical record attachment upload (Add Medical Record modal) */
+
+.record-file-upload {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.record-file-upload:hover,
+.record-file-upload.drag-over {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+}
+
+.record-file-upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.record-file-upload-content span:first-child {
+  font-size: 1.5rem;
+}
+
+.clinical-record-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.clinical-record-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.clinical-record-file-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.clinical-record-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.clinical-record-file-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clinical-record-file-size {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.clinical-record-file-remove {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(231, 76, 60, 0.08);
+  color: #e74c3c;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.clinical-record-file-remove:hover {
+  background: rgba(231, 76, 60, 0.18);
+}
+
+.clinical-record-file-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Modal confirmation */

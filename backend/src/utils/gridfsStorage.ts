@@ -95,6 +95,28 @@ export async function deleteFile(fileId: mongoose.Types.ObjectId): Promise<void>
   await bucket.delete(fileId);
 }
 
+export async function downloadFileFromBucket(
+  bucketName: string,
+  fileId: mongoose.Types.ObjectId
+): Promise<{ stream: Readable; fileName: string; mimeType: string; fileSize: number }> {
+  const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db!, { bucketName });
+  const filesCollection = mongoose.connection.db!.collection(`${bucketName}.files`);
+
+  const fileDoc = await filesCollection.findOne({ _id: fileId });
+  if (!fileDoc) {
+    throw new Error("File not found in GridFS");
+  }
+
+  const downloadStream = bucket.openDownloadStream(fileId);
+
+  return {
+    stream: downloadStream,
+    fileName: fileDoc.filename,
+    mimeType: fileDoc.contentType || fileDoc.metadata?.contentType || "application/octet-stream",
+    fileSize: fileDoc.length,
+  };
+}
+
 export function isAllowedMimeType(mimeType: string): boolean {
   return ALLOWED_MIME_TYPES.includes(mimeType);
 }

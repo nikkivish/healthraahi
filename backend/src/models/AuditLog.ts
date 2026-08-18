@@ -17,7 +17,10 @@ export type AuditAction =
   | "CAMP_CANCELLED"
   | "DOCTOR_VERIFICATION_APPROVED"
   | "DOCTOR_VERIFICATION_REJECTED"
-  | "DOCTOR_VERIFIED";
+  | "DOCTOR_VERIFIED"
+  | "DOCUMENT_UPLOADED"
+  | "DOCUMENT_DOWNLOADED"
+  | "DOCUMENT_DELETED";
 
 export type AuditResult = "SUCCESS" | "DENIED" | "FAILED";
 
@@ -67,6 +70,9 @@ const auditLogSchema = new Schema<IAuditLog>(
         "DOCTOR_VERIFICATION_APPROVED",
         "DOCTOR_VERIFICATION_REJECTED",
         "DOCTOR_VERIFIED",
+        "DOCUMENT_UPLOADED",
+        "DOCUMENT_DOWNLOADED",
+        "DOCUMENT_DELETED",
       ],
       required: true,
     },

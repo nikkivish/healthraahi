@@ -50,3 +50,25 @@ export function handleMulterError(
   }
   next(err);
 }
+
+const MAX_FILES = 10;
+
+export const uploadMultiMiddleware = multer({
+  storage,
+  limits: {
+    fileSize: MAX_FILE_SIZE_BYTES,
+    files: MAX_FILES,
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!ALLOWED_MIME_SET.has(file.mimetype)) {
+      cb(
+        new AppError(
+          `Unsupported file type "${file.mimetype}". Allowed: ${ALLOWED_MIME_TYPES.join(", ")}`,
+          400
+        )
+      );
+      return;
+    }
+    cb(null, true);
+  },
+}).array("files", MAX_FILES);

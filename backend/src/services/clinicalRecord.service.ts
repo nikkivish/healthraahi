@@ -48,6 +48,7 @@ const serializeClinicalRecord = (record: any) => ({
   diagnosis: record.diagnosis ?? [],
   prescriptions: record.prescriptions ?? [],
   followUpPlan: record.followUpPlan ?? undefined,
+  documentCount: record.documentCount ?? 0,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });
@@ -83,7 +84,7 @@ const validateConsentForRecord = async ({
     status: "APPROVED",
     validFrom: { $lte: now },
     validUntil: { $gte: now },
-    categories: { $in: categories },
+    categories: { $in: ["MEDICAL_RECORDS"] },
     ...(hospitalId ? { hospitalId: { $in: [null, hospitalId] } } : {}),
   }).sort({ createdAt: -1 });
 
@@ -138,8 +139,8 @@ export const createClinicalRecord = async (doctorId: string, input: Partial<Clin
     throw new AppError("Category, record type, title, and summary are required", 400);
   }
 
-  if (!consent.categories.includes(category)) {
-    throw new AppError("Consent does not cover this record category", 403);
+  if (!consent.categories.includes("MEDICAL_RECORDS")) {
+    throw new AppError("Consent does not cover medical records access", 403);
   }
 
   const record = await ClinicalRecord.create({
@@ -275,7 +276,7 @@ export const getDoctorAccessibleRecords = async (doctorId: string) => {
       : record.workerId.toString();
     const consentInfo = workerConsentMap.get(wid);
     if (!consentInfo) return false;
-    if (!consentInfo.categories.includes(record.category)) return false;
+    if (!consentInfo.categories.includes("MEDICAL_RECORDS")) return false;
     if (
       record.hospitalId &&
       consentInfo.hospitalId &&

@@ -396,3 +396,47 @@ export async function downloadWorkerDocumentFile(token, documentId) {
 
   return res;
 }
+
+export async function uploadClinicalRecordDocuments(token, recordId, files) {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('files', file);
+  }
+
+  const res = await fetch(`${API_BASE}/clinical-record-documents/${recordId}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+
+  const text = await res.text();
+  let data;
+  try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+
+  if (!res.ok || data.success === false) {
+    const err = new Error(data.message || 'Document upload failed');
+    err.status = res.status;
+    throw err;
+  }
+
+  return data;
+}
+
+export function getClinicalRecordDocuments(token, recordId) {
+  return request(`/clinical-record-documents/record/${recordId}`, { token, method: 'GET' });
+}
+
+export async function downloadClinicalRecordDocument(token, documentId) {
+  const res = await fetch(`${API_BASE}/clinical-record-documents/${documentId}/download`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    let msg = 'Download failed';
+    try { const d = await res.json(); msg = d.message || msg; } catch {}
+    throw new Error(msg);
+  }
+
+  return res;
+}
