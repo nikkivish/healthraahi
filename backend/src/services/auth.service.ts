@@ -7,6 +7,7 @@ import {
 } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { createWorkerProfileForUser } from "./workerProfile.service";
+import { DoctorProfile } from "../models/DoctorProfile";
 
 export interface SafeUser {
   id: string;
@@ -99,6 +100,29 @@ export const registerUser = async (input: RegisterInput): Promise<SafeUser> => {
 
   if (role === "WORKER") {
     await createWorkerProfileForUser(user._id.toString(), {});
+  }
+
+  if (role === "DOCTOR") {
+    const doctorId = `DR-${Date.now().toString(36).toUpperCase()}-${Math.random()
+      .toString(36)
+      .slice(2, 7)
+      .toUpperCase()}`;
+
+    const medicalRegistrationNumber = `PENDING-${Date.now().toString(36).toUpperCase()}-${Math.random()
+      .toString(36)
+      .slice(2, 7)
+      .toUpperCase()}`;
+
+    await DoctorProfile.create({
+      userId: user._id,
+      doctorId,
+      fullName: name.trim(),
+      specialization: "General Medicine",
+      medicalRegistrationNumber,
+      phone: phone.trim(),
+      isVerified: false,
+      verificationStatus: "PENDING",
+    });
   }
 
   return toSafeUser(user);

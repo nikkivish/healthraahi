@@ -17,4 +17,7 @@ export const env = {
   corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173",
   jwtSecret: process.env.JWT_SECRET as string,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  msg91AuthKey: process.env.MSG91_AUTH_KEY || "",
+  msg91FlowId: process.env.MSG91_FLOW_ID || "",
+  msg91SenderId: process.env.MSG91_SENDER_ID || "",
 };

@@ -3,6 +3,7 @@ import app from "../src/app";
 import { connectDatabase, disconnectDatabase } from "../src/config/database";
 import { MedicalCamp } from "../src/models/MedicalCamp";
 import { CampRegistration } from "../src/models/CampRegistration";
+import { CampSmsLog } from "../src/models/CampSmsLog";
 import { User } from "../src/models/User";
 import { signToken } from "../src/utils/jwt";
 import { stopMongoMemoryServer } from "./setup";
@@ -16,6 +17,7 @@ describe("Medical camp registration flow", () => {
     await User.deleteMany({});
     await MedicalCamp.deleteMany({});
     await CampRegistration.deleteMany({});
+    await CampSmsLog.deleteMany({});
   });
 
   afterAll(async () => {

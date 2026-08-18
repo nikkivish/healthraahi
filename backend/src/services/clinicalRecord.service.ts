@@ -5,6 +5,7 @@ import { ClinicalRecord } from "../models/ClinicalRecord";
 import { Consent } from "../models/Consent";
 import { DoctorProfile } from "../models/DoctorProfile";
 import { User } from "../models/User";
+import { WorkerProfile } from "../models/WorkerProfile";
 import { logAuditEvent } from "./auditLog.service";
 
 export interface ClinicalRecordInput {
@@ -23,9 +24,21 @@ export interface ClinicalRecordInput {
 
 const serializeClinicalRecord = (record: any) => ({
   id: record._id.toString(),
-  workerId: record.workerId.toString(),
-  doctorId: record.doctorId.toString(),
-  hospitalId: record.hospitalId ? record.hospitalId.toString() : undefined,
+  workerId: record.workerId?._id
+    ? record.workerId._id.toString()
+    : record.workerId.toString(),
+  workerName: record.workerId?.name ?? undefined,
+  workerHealthId: record.workerHealthId ?? undefined,
+  doctorId: record.doctorId?._id
+    ? record.doctorId._id.toString()
+    : record.doctorId.toString(),
+  doctorName: record.doctorId?.name ?? undefined,
+  hospitalId: record.hospitalId
+    ? record.hospitalId._id
+      ? record.hospitalId._id.toString()
+      : record.hospitalId.toString()
+    : undefined,
+  hospitalName: record.hospitalId?.name ?? undefined,
   consentId: record.consentId.toString(),
   recordType: record.recordType,
   category: record.category,
@@ -158,7 +171,19 @@ export const createClinicalRecord = async (doctorId: string, input: Partial<Clin
     },
   });
 
-  return serializeClinicalRecord(record);
+  const populated = await ClinicalRecord.findById(record._id)
+    .populate("workerId", "name")
+    .populate("doctorId", "name")
+    .populate("hospitalId", "name");
+
+  const workerProfile = await WorkerProfile.findOne({ userId: workerId })
+    .select("healthId")
+    .lean();
+
+  return serializeClinicalRecord({
+    ...(populated || record).toObject(),
+    workerHealthId: workerProfile?.healthId,
+  });
 };
 
 export const getWorkerClinicalRecords = async (workerId: string, actor: AuthenticatedUser) => {
@@ -168,18 +193,108 @@ export const getWorkerClinicalRecords = async (workerId: string, actor: Authenti
 
   if (actor.role === "DOCTOR") {
     await validateDoctorAccess(actor.id);
-    await validateConsentForRecord({ workerId, doctorId: actor.id, categories: ["general"], hospitalId: undefined });
+    const hasConsent = await Consent.findOne({
+      workerId,
+      doctorId: actor.id,
+      status: "APPROVED",
+      validFrom: { $lte: new Date() },
+      validUntil: { $gte: new Date() },
+    });
+    if (!hasConsent) {
+      throw new AppError("Active consent is required to access this worker's records", 403);
+    }
   }
 
-  const records = await ClinicalRecord.find({ workerId }).sort({ createdAt: -1 });
+  const records = await ClinicalRecord.find({ workerId })
+    .populate("doctorId", "name")
+    .populate("hospitalId", "name")
+    .sort({ createdAt: -1 });
+
   return records.map((record) => serializeClinicalRecord(record));
 };
 
 export const getDoctorAccessibleRecords = async (doctorId: string) => {
   await validateDoctorAccess(doctorId);
 
-  const records = await ClinicalRecord.find({ doctorId }).sort({ createdAt: -1 });
-  return records.map((record) => serializeClinicalRecord(record));
+  const now = new Date();
+
+  const validConsents = await Consent.find({
+    doctorId,
+    status: "APPROVED",
+    validFrom: { $lte: now },
+    validUntil: { $gte: now },
+  }).lean();
+
+  if (validConsents.length === 0) {
+    return [];
+  }
+
+  const workerConsentMap = new Map<
+    string,
+    { categories: string[]; hospitalId?: string }
+  >();
+  for (const c of validConsents) {
+    const wid = c.workerId.toString();
+    const existing = workerConsentMap.get(wid);
+    if (existing) {
+      existing.categories = [
+        ...new Set([...existing.categories, ...c.categories]),
+      ];
+    } else {
+      workerConsentMap.set(wid, {
+        categories: [...c.categories],
+        hospitalId: c.hospitalId ? c.hospitalId.toString() : undefined,
+      });
+    }
+  }
+
+  const workerIds = [...workerConsentMap.keys()];
+
+  const records = await ClinicalRecord.find({
+    workerId: { $in: workerIds },
+  })
+    .populate("workerId", "name")
+    .populate("doctorId", "name")
+    .populate("hospitalId", "name")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const workerHealthIdMap = new Map<string, string>();
+  const profiles = await WorkerProfile.find({
+    userId: { $in: workerIds },
+  })
+    .select("userId healthId")
+    .lean();
+  for (const p of profiles) {
+    workerHealthIdMap.set(p.userId.toString(), p.healthId);
+  }
+
+  const filtered = records.filter((record: any) => {
+    const wid = record.workerId._id
+      ? record.workerId._id.toString()
+      : record.workerId.toString();
+    const consentInfo = workerConsentMap.get(wid);
+    if (!consentInfo) return false;
+    if (!consentInfo.categories.includes(record.category)) return false;
+    if (
+      record.hospitalId &&
+      consentInfo.hospitalId &&
+      record.hospitalId.toString() !== consentInfo.hospitalId
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  return filtered.map((record: any) => {
+    const wid = record.workerId._id
+      ? record.workerId._id.toString()
+      : record.workerId.toString();
+    return serializeClinicalRecord({
+      ...record,
+      workerHealthId: workerHealthIdMap.get(wid),
+    });
+  });
 };
 
 export const getClinicalRecordById = async (recordId: string, actor: AuthenticatedUser) => {
@@ -187,28 +302,43 @@ export const getClinicalRecordById = async (recordId: string, actor: Authenticat
     throw new AppError("Invalid record ID", 400);
   }
 
-  const record = await ClinicalRecord.findById(recordId);
+  const record = await ClinicalRecord.findById(recordId)
+    .populate("workerId", "name")
+    .populate("doctorId", "name")
+    .populate("hospitalId", "name");
   if (!record) {
     throw new AppError("Clinical record not found", 404);
   }
 
-  if (actor.role === "WORKER" && record.workerId.toString() !== actor.id) {
+  const recordWorkerId = record.workerId._id
+    ? record.workerId._id.toString()
+    : record.workerId.toString();
+
+  if (actor.role === "WORKER" && recordWorkerId !== actor.id) {
     throw new AppError("You can only access your own records", 403);
   }
 
   if (actor.role === "DOCTOR") {
     await validateDoctorAccess(actor.id);
     await validateConsentForRecord({
-      workerId: record.workerId.toString(),
+      workerId: recordWorkerId,
       doctorId: actor.id,
       categories: [record.category],
-      hospitalId: record.hospitalId ? record.hospitalId.toString() : undefined,
+      hospitalId: record.hospitalId
+        ? record.hospitalId._id
+          ? record.hospitalId._id.toString()
+          : record.hospitalId.toString()
+        : undefined,
     });
   }
 
   if (actor.role === "ADMIN") {
     throw new AppError("Admin does not have direct access to clinical records", 403);
   }
+
+  const workerProfile = await WorkerProfile.findOne({ userId: recordWorkerId })
+    .select("healthId")
+    .lean();
 
   await logAuditEvent({
     actorUserId: actor.id,
@@ -220,7 +350,10 @@ export const getClinicalRecordById = async (recordId: string, actor: Authenticat
     details: { recordType: record.recordType, category: record.category },
   });
 
-  return serializeClinicalRecord(record);
+  return serializeClinicalRecord({
+    ...record.toObject(),
+    workerHealthId: workerProfile?.healthId,
+  });
 };
 
 export const updateClinicalRecord = async (doctorId: string, recordId: string, input: Partial<ClinicalRecordInput>) => {

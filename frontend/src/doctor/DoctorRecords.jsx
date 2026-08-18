@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getDoctorRecords } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -11,6 +12,7 @@ function formatDate(iso) {
 function DoctorRecords() {
   const { token } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -68,17 +70,18 @@ function DoctorRecords() {
         <table className="records-table">
           <thead>
             <tr>
-              <th>{t('doctor.records.workerId')}</th>
+              <th>{t('doctor.records.worker')}</th>
               <th>{t('doctor.records.date')}</th>
               <th>{t('doctor.records.recordType')}</th>
               <th>{t('doctor.records.titleCol')}</th>
-              <th>Action</th>
+              <th>{t('doctor.records.category')}</th>
+              <th>{t('doctor.records.action')}</th>
             </tr>
           </thead>
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan={5} className="empty-table-cell">
+                <td colSpan={6} className="empty-table-cell">
                   {t('doctor.records.noRecords')}
                 </td>
               </tr>
@@ -87,7 +90,8 @@ function DoctorRecords() {
                 <tr key={record.id}>
                   <td>
                     <div className="record-worker-cell">
-                      <span className="record-worker-id">{record.workerId}</span>
+                      <span className="record-worker-name">{record.workerName || '—'}</span>
+                      <span className="record-worker-id">{record.workerHealthId || record.workerId}</span>
                     </div>
                   </td>
                   <td>{formatDate(record.createdAt)}</td>
@@ -95,8 +99,15 @@ function DoctorRecords() {
                     <span className="record-type-badge">{record.recordType}</span>
                   </td>
                   <td>{record.title || '—'}</td>
+                  <td>{record.category || '—'}</td>
                   <td>
-                    <button className="view-btn" type="button">View</button>
+                    <button
+                      className="view-btn"
+                      type="button"
+                      onClick={() => navigate(`/doctor/records/${record.id}`)}
+                    >
+                      {t('doctor.records.view')}
+                    </button>
                   </td>
                 </tr>
               ))

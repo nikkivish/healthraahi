@@ -14,7 +14,10 @@ export type AuditAction =
   | "CAMP_REGISTRATION_CANCELLED"
   | "CAMP_CREATED"
   | "CAMP_UPDATED"
-  | "CAMP_CANCELLED";
+  | "CAMP_CANCELLED"
+  | "DOCTOR_VERIFICATION_APPROVED"
+  | "DOCTOR_VERIFICATION_REJECTED"
+  | "DOCTOR_VERIFIED";
 
 export type AuditResult = "SUCCESS" | "DENIED" | "FAILED";
 
@@ -22,7 +25,7 @@ export interface IAuditLog extends Document {
   actorUserId: Types.ObjectId;
   actorRole: "WORKER" | "DOCTOR" | "ADMIN";
   action: AuditAction;
-  resourceType: "CONSENT" | "CLINICAL_RECORD" | "CAMP";
+  resourceType: "CONSENT" | "CLINICAL_RECORD" | "CAMP" | "DOCTOR_VERIFICATION";
   resourceId: Types.ObjectId;
   result: AuditResult;
   details?: Record<string, unknown>;
@@ -61,13 +64,16 @@ const auditLogSchema = new Schema<IAuditLog>(
         "CAMP_CREATED",
         "CAMP_UPDATED",
         "CAMP_CANCELLED",
+        "DOCTOR_VERIFICATION_APPROVED",
+        "DOCTOR_VERIFICATION_REJECTED",
+        "DOCTOR_VERIFIED",
       ],
       required: true,
     },
 
     resourceType: {
       type: String,
-      enum: ["CONSENT", "CLINICAL_RECORD", "CAMP"],
+      enum: ["CONSENT", "CLINICAL_RECORD", "CAMP", "DOCTOR_VERIFICATION"],
       required: true,
     },
 

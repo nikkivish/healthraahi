@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { lookupWorkerByHealthId } from '../api';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -6,6 +7,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 function DoctorWorkers() {
   const { token } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,13 @@ function DoctorWorkers() {
               <span className={`worker-status-badge ${worker.isActive ? 'active' : 'inactive'}`}>
                 {worker.isActive ? 'Active' : 'Inactive'}
               </span>
-              <button className="view-btn" type="button">View Profile</button>
+              <button
+                className="view-btn"
+                type="button"
+                onClick={() => navigate(`/doctor/workers/${encodeURIComponent(worker.healthId)}`)}
+              >
+                {t('common.viewProfile')}
+              </button>
             </div>
           </div>
         )}

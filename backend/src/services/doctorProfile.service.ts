@@ -3,6 +3,11 @@ import { AppError } from "../middleware/errorHandler";
 import { DoctorProfile, VerificationStatus } from "../models/DoctorProfile";
 import { Hospital } from "../models/Hospital";
 import { User } from "../models/User";
+import {
+  DoctorVerificationDocument,
+  VALID_DOCTOR_DOC_TYPES,
+} from "../models/DoctorVerificationDocument";
+import { logAuditEvent } from "./auditLog.service";
 
 export interface DoctorProfileEditableInput {
   fullName?: string;
@@ -376,7 +381,8 @@ export const getPendingDoctorProfiles = async () => {
 export const updateDoctorVerificationStatus = async (
   doctorId: string,
   status: VerificationStatus,
-  reason?: string
+  reason?: string,
+  actorUserId?: string
 ) => {
   const profile = await DoctorProfile.findOne({ doctorId });
 
@@ -388,6 +394,28 @@ export const updateDoctorVerificationStatus = async (
     throw new AppError("Invalid verification status", 400);
   }
 
+  if (status === "VERIFIED") {
+    const requiredTypes = VALID_DOCTOR_DOC_TYPES;
+    const docs = await DoctorVerificationDocument.find({
+      doctorUserId: profile.userId,
+    });
+
+    const approvedTypes = new Set(
+      docs
+        .filter((d) => d.status === "APPROVED")
+        .map((d) => d.documentType)
+    );
+
+    const missingApproved = requiredTypes.filter((t) => !approvedTypes.has(t));
+
+    if (missingApproved.length > 0) {
+      throw new AppError(
+        `Cannot verify doctor: the following required documents must be approved first: ${missingApproved.join(", ")}`,
+        400
+      );
+    }
+  }
+
   profile.verificationStatus = status;
   profile.isVerified = status === "VERIFIED";
 
@@ -396,6 +424,23 @@ export const updateDoctorVerificationStatus = async (
   }
 
   await profile.save();
+
+  if (actorUserId) {
+    logAuditEvent({
+      actorUserId,
+      actorRole: "ADMIN",
+      action: "DOCTOR_VERIFIED",
+      resourceType: "DOCTOR_VERIFICATION",
+      resourceId: profile._id.toString(),
+      result: "SUCCESS",
+      details: {
+        doctorId,
+        doctorUserId: profile.userId.toString(),
+        verificationStatus: status,
+        ...(reason && reason.trim() ? { reason: reason.trim() } : {}),
+      },
+    }).catch(() => {});
+  }
 
   return await serializeDoctorProfile(profile);
 };

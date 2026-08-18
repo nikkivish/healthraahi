@@ -56,8 +56,20 @@ export function getWorkerProfile(token) {
   return request('/workers/profile/me', { token, method: 'GET' });
 }
 
+export function updateWorkerProfile(token, data) {
+  return request('/workers/profile/me', { token, method: 'PATCH', body: data });
+}
+
 export function getWorkerRecords(token) {
   return request('/clinical-records/me', { token, method: 'GET' });
+}
+
+export function requestConsent(token, data) {
+  return request('/consents/', {
+    token,
+    method: 'POST',
+    body: data,
+  });
 }
 
 export function getWorkerConsents(token) {
@@ -80,6 +92,14 @@ export function getDoctorProfile(token) {
   return request('/doctors/profile/me', { token, method: 'GET' });
 }
 
+export function updateDoctorProfile(token, data) {
+  return request('/doctors/profile/me', {
+    token,
+    method: 'PATCH',
+    body: data,
+  });
+}
+
 export function getDoctorConsents(token) {
   return request('/consents/me', { token, method: 'GET' });
 }
@@ -88,8 +108,24 @@ export function getDoctorRecords(token) {
   return request('/clinical-records/doctor-access', { token, method: 'GET' });
 }
 
+export function createClinicalRecord(token, data) {
+  return request('/clinical-records/', {
+    token,
+    method: 'POST',
+    body: data,
+  });
+}
+
+export function getClinicalRecord(token, recordId) {
+  return request(`/clinical-records/${recordId}`, { token, method: 'GET' });
+}
+
 export function lookupWorkerByHealthId(token, healthId) {
   return request(`/workers/lookup/${encodeURIComponent(healthId)}`, { token, method: 'GET' });
+}
+
+export function getWorkerProfileForDoctor(token, healthId) {
+  return request(`/workers/lookup/${encodeURIComponent(healthId)}/profile`, { token, method: 'GET' });
 }
 
 export function getHospital(token, hospitalId) {
@@ -124,6 +160,18 @@ export function verifyDoctor(token, doctorId, status, reason) {
 
 export function getAllHospitals(token) {
   return request('/hospitals/', { token, method: 'GET' });
+}
+
+export function linkDoctorToHospital(token, hospitalId) {
+  return request('/doctors/profile/me/hospital', {
+    token,
+    method: 'PATCH',
+    body: { hospitalId },
+  });
+}
+
+export function unlinkDoctorFromHospital(token) {
+  return request('/doctors/profile/me/hospital', { token, method: 'DELETE' });
 }
 
 // ─── Medical Camps ──────────────────────────────────────────────────────────
@@ -176,4 +224,175 @@ export function assignDoctorToCamp(token, campId, doctorId) {
 
 export function getAdminCampRegistrations(token, campId) {
   return request(`/camps/admin/${encodeURIComponent(campId)}/registrations`, { token, method: 'GET' });
+}
+
+// ─── Doctor Verification Documents ───────────────────────────────────────────
+
+export function getDoctorVerificationDocuments(token) {
+  return request('/doctor-verification-documents/me', { token, method: 'GET' });
+}
+
+export async function uploadDoctorVerificationDocument(token, file, documentType) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('documentType', documentType);
+
+  const res = await fetch(`${API_BASE}/doctor-verification-documents`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    const err = new Error('Invalid server response');
+    err.status = res.status;
+    throw err;
+  }
+
+  if (!res.ok || data.success === false) {
+    const err = new Error(data.message || 'Upload failed');
+    err.status = res.status;
+    throw err;
+  }
+
+  return data;
+}
+
+export async function replaceDoctorVerificationDocument(token, documentId, file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_BASE}/doctor-verification-documents/${encodeURIComponent(documentId)}/replace`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    const err = new Error('Invalid server response');
+    err.status = res.status;
+    throw err;
+  }
+
+  if (!res.ok || data.success === false) {
+    const err = new Error(data.message || 'Replace failed');
+    err.status = res.status;
+    throw err;
+  }
+
+  return data;
+}
+
+export function deleteDoctorVerificationDocument(token, documentId) {
+  return request(`/doctor-verification-documents/${encodeURIComponent(documentId)}`, { token, method: 'DELETE' });
+}
+
+export async function downloadDoctorVerificationDocumentFile(token, documentId) {
+  const res = await fetch(`${API_BASE}/doctor-verification-documents/${encodeURIComponent(documentId)}/download`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    let msg = 'Download failed';
+    try { const d = await res.json(); msg = d.message || msg; } catch {}
+    throw new Error(msg);
+  }
+
+  return res;
+}
+
+// ─── Admin: Doctor Verification Documents ────────────────────────────────────
+
+export function getAdminDoctorVerificationDocuments(token, doctorUserId) {
+  return request(`/doctor-verification-documents/admin/${encodeURIComponent(doctorUserId)}`, { token, method: 'GET' });
+}
+
+export async function adminDownloadDoctorDocument(token, documentId) {
+  const res = await fetch(`${API_BASE}/doctor-verification-documents/admin/doc/${encodeURIComponent(documentId)}/download`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    let msg = 'Download failed';
+    try { const d = await res.json(); msg = d.message || msg; } catch {}
+    throw new Error(msg);
+  }
+
+  return res;
+}
+
+export function adminUpdateDocumentStatus(token, documentId, status, rejectionReason) {
+  const body = { status };
+  if (rejectionReason) body.rejectionReason = rejectionReason;
+  return request(`/doctor-verification-documents/admin/doc/${encodeURIComponent(documentId)}/status`, { token, method: 'PATCH', body });
+}
+
+// ─── Worker Health Documents ─────────────────────────────────────────────────
+
+export function getWorkerDocuments(token) {
+  return request('/worker-documents/me', { token, method: 'GET' });
+}
+
+export function getWorkerDocumentById(token, documentId) {
+  return request(`/worker-documents/${encodeURIComponent(documentId)}`, { token, method: 'GET' });
+}
+
+export async function uploadWorkerDocument(token, file, documentType, description) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('documentType', documentType);
+  if (description) formData.append('description', description);
+
+  const res = await fetch(`${API_BASE}/worker-documents`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData,
+  });
+
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    const err = new Error('Invalid server response');
+    err.status = res.status;
+    throw err;
+  }
+
+  if (!res.ok || data.success === false) {
+    const err = new Error(data.message || 'Upload failed');
+    err.status = res.status;
+    throw err;
+  }
+
+  return data;
+}
+
+export function deleteWorkerDocument(token, documentId) {
+  return request(`/worker-documents/${encodeURIComponent(documentId)}`, { token, method: 'DELETE' });
+}
+
+export async function downloadWorkerDocumentFile(token, documentId) {
+  const res = await fetch(`${API_BASE}/worker-documents/${encodeURIComponent(documentId)}/download`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    let msg = 'Download failed';
+    try { const d = await res.json(); msg = d.message || msg; } catch {}
+    throw new Error(msg);
+  }
+
+  return res;
 }

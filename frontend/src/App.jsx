@@ -18,8 +18,11 @@ import DoctorProfile from './doctor/DoctorProfile';
 import DoctorVerification from './doctor/DoctorVerification';
 import DoctorHospital from './doctor/DoctorHospital';
 import DoctorWorkers from './doctor/DoctorWorkers';
+import DoctorWorkerProfile from './doctor/DoctorWorkerProfile';
 import DoctorConsents from './doctor/DoctorConsents';
 import DoctorRecords from './doctor/DoctorRecords';
+import DoctorRecordDetail from './doctor/DoctorRecordDetail';
+import WorkerRecordDetail from './worker/WorkerRecordDetail';
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminWorkers from './admin/AdminWorkers';
@@ -31,6 +34,7 @@ import AdminAudit from './admin/AdminAudit';
 import AdminCamps from './admin/AdminCamps';
 import DoctorCamps from './doctor/DoctorCamps';
 import WorkerCamps from './worker/WorkerCamps';
+import WorkerDocuments from './worker/WorkerDocuments';
 import MedicalCamps from './MedicalCamps';
 import './App.css';
 
@@ -165,9 +169,11 @@ function AppContent() {
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="profile" element={<WorkerProfile />} />
           <Route path="records" element={<WorkerRecords />} />
+          <Route path="records/:recordId" element={<WorkerRecordDetail />} />
           <Route path="consent" element={<WorkerConsent />} />
           <Route path="health-id" element={<WorkerHealthId />} />
           <Route path="camps" element={<WorkerCamps />} />
+          <Route path="documents" element={<WorkerDocuments />} />
         </Route>
         <Route path="/worker/lookup/:healthId" element={<WorkerLookup />} />
         <Route path="/doctor" element={
@@ -181,8 +187,10 @@ function AppContent() {
           <Route path="verification" element={<DoctorVerification />} />
           <Route path="hospital" element={<DoctorHospital />} />
           <Route path="workers" element={<DoctorWorkers />} />
+          <Route path="workers/:healthId" element={<DoctorWorkerProfile />} />
           <Route path="consents" element={<DoctorConsents />} />
           <Route path="records" element={<DoctorRecords />} />
+          <Route path="records/:recordId" element={<DoctorRecordDetail />} />
           <Route path="camps" element={<DoctorCamps />} />
         </Route>
         <Route path="/admin" element={

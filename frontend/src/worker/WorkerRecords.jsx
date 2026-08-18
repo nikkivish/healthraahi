@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getWorkerRecords } from '../api';
@@ -12,6 +13,7 @@ function formatDate(iso) {
 function WorkerRecords() {
   const { token } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,13 +75,14 @@ function WorkerRecords() {
               <th>{t('worker.records.recordType')}</th>
               <th>{t('worker.records.titleCol')}</th>
               <th>{t('worker.records.category')}</th>
-              <th>Action</th>
+              <th>{t('worker.records.doctor')}</th>
+              <th>{t('worker.records.action')}</th>
             </tr>
           </thead>
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan={5} className="empty-table-cell">
+                <td colSpan={6} className="empty-table-cell">
                   {t('worker.records.noRecords')}
                 </td>
               </tr>
@@ -92,9 +95,14 @@ function WorkerRecords() {
                   </td>
                   <td>{record.title || '—'}</td>
                   <td>{record.category || '—'}</td>
+                  <td>{record.doctorName || '—'}</td>
                   <td>
-                    <button className="view-btn" type="button">
-                      View
+                    <button
+                      className="view-btn"
+                      type="button"
+                      onClick={() => navigate(`/worker/records/${record.id}`)}
+                    >
+                      {t('worker.records.view')}
                     </button>
                   </td>
                 </tr>

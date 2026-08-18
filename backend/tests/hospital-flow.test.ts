@@ -1,7 +1,9 @@
+import mongoose from "mongoose";
 import request from "supertest";
 import app from "../src/app";
 import { connectDatabase, disconnectDatabase } from "../src/config/database";
 import { DoctorProfile } from "../src/models/DoctorProfile";
+import { DoctorVerificationDocument } from "../src/models/DoctorVerificationDocument";
 import { User } from "../src/models/User";
 import { signToken } from "../src/utils/jwt";
 import { stopMongoMemoryServer } from "./setup";
@@ -14,6 +16,7 @@ describe("Hospital management and doctor-hospital linking", () => {
   beforeEach(async () => {
     await User.deleteMany({});
     await DoctorProfile.deleteMany({});
+    await DoctorVerificationDocument.deleteMany({});
   });
 
   afterAll(async () => {
@@ -149,7 +152,7 @@ describe("Hospital management and doctor-hospital linking", () => {
     const hospitalId = hospitalResponse.body.data.hospital.id;
 
     const doctorProfileResponse = await request(app)
-      .post("/api/doctors/profile")
+      .patch("/api/doctors/profile/me")
       .set("Authorization", `Bearer ${doctorToken}`)
       .send({
         fullName: "Dr. Smith",
@@ -158,7 +161,7 @@ describe("Hospital management and doctor-hospital linking", () => {
         phone: "+15550004444",
       });
 
-    expect(doctorProfileResponse.status).toBe(201);
+    expect(doctorProfileResponse.status).toBe(200);
 
     const unverifiedLink = await request(app)
       .patch("/api/doctors/profile/me/hospital")
@@ -170,6 +173,39 @@ describe("Hospital management and doctor-hospital linking", () => {
 
     const doctorProfile = await DoctorProfile.findOne({ userId: doctor.id });
     expect(doctorProfile).not.toBeNull();
+
+    await DoctorVerificationDocument.insertMany([
+      {
+        doctorUserId: doctor.id,
+        documentType: "MEDICAL_COUNCIL_REGISTRATION",
+        fileName: "mcr.pdf",
+        originalName: "mcr.pdf",
+        mimeType: "application/pdf",
+        fileSize: 1024,
+        gridfsFileId: new mongoose.Types.ObjectId(),
+        status: "APPROVED",
+      },
+      {
+        doctorUserId: doctor.id,
+        documentType: "IDENTITY_PROOF",
+        fileName: "id.pdf",
+        originalName: "id.pdf",
+        mimeType: "application/pdf",
+        fileSize: 1024,
+        gridfsFileId: new mongoose.Types.ObjectId(),
+        status: "APPROVED",
+      },
+      {
+        doctorUserId: doctor.id,
+        documentType: "QUALIFICATION_CERTIFICATE",
+        fileName: "qual.pdf",
+        originalName: "qual.pdf",
+        mimeType: "application/pdf",
+        fileSize: 1024,
+        gridfsFileId: new mongoose.Types.ObjectId(),
+        status: "APPROVED",
+      },
+    ]);
 
     const verifyResponse = await request(app)
       .patch(`/api/doctors/${doctorProfile!.doctorId}/verify`)

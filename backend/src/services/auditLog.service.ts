@@ -5,7 +5,7 @@ interface LogAuditInput {
   actorUserId: string;
   actorRole: UserRole;
   action: AuditAction;
-  resourceType: "CONSENT" | "CLINICAL_RECORD" | "CAMP";
+  resourceType: "CONSENT" | "CLINICAL_RECORD" | "CAMP" | "DOCTOR_VERIFICATION";
   resourceId: string;
   result: AuditResult;
   details?: Record<string, unknown>;

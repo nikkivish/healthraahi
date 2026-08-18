@@ -6,6 +6,7 @@ import { MedicalCamp, CampStatus } from "../models/MedicalCamp";
 import { User, UserRole } from "../models/User";
 import { WorkerProfile } from "../models/WorkerProfile";
 import { logAuditEvent } from "./auditLog.service";
+import { sendCampCreationSms } from "./sms.service";
 
 // ─── Serializers ───────────────────────────────────────────────────────────
 
@@ -420,6 +421,10 @@ export const createCamp = async (
     result: "SUCCESS",
     details: { campName: camp.name, campId: camp.campId },
   });
+
+  sendCampCreationSms(camp).catch((err) =>
+    console.error("[SMS] Camp creation SMS batch failed:", err)
+  );
 
   return serializeCamp(camp);
 };

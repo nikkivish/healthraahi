@@ -15,6 +15,7 @@ function WorkerLayout() {
     { to: '/worker/records', label: t('worker.records.title'), icon: '☰' },
     { to: '/worker/consent', label: t('worker.consent.title'), icon: '◈' },
     { to: '/worker/health-id', label: t('worker.healthId.title'), icon: '⊕' },
+    { to: '/worker/documents', label: t('documents.myDocuments'), icon: '📂' },
     { to: '/worker/camps', label: t('camps.myCamps'), icon: '🏥' },
     { to: '/', label: t('common.home'), icon: '⌂' },
   ];

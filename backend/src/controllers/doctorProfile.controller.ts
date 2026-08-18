@@ -188,7 +188,8 @@ export const verifyDoctorProfile = async (
     const profile = await updateDoctorVerificationStatus(
       doctorId,
       statusValue as "PENDING" | "VERIFIED" | "REJECTED",
-      typeof reasonValue === "string" ? reasonValue : undefined
+      typeof reasonValue === "string" ? reasonValue : undefined,
+      req.user?.id
     );
 
     res.status(200).json({

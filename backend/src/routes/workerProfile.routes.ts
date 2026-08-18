@@ -2,11 +2,13 @@ import { Router } from "express";
 import {
   createWorkerProfile,
   getWorkerProfile,
+  getWorkerProfileForDoctor,
   lookupWorkerIdentityByHealthId,
   replaceWorkerProfile,
   updateWorkerProfile,
 } from "../controllers/workerProfile.controller";
 import { authenticate } from "../middleware/authenticate";
+import { requireVerifiedDoctor } from "../middleware/requireVerifiedDoctor";
 import { requireRole } from "../middleware/requireRole";
 
 const router = Router();
@@ -37,6 +39,13 @@ router.patch(
   authenticate,
   requireRole("WORKER"),
   updateWorkerProfile
+);
+
+router.get(
+  "/lookup/:healthId/profile",
+  authenticate,
+  requireVerifiedDoctor,
+  getWorkerProfileForDoctor
 );
 
 router.get(
