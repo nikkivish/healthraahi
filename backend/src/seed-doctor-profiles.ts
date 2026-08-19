@@ -31,7 +31,7 @@ async function seedDoctorProfiles() {
   console.log("🏥 Doctor Profile Migration Script");
   console.log("=".repeat(60));
 
-  await mongoose.connect(MONGO_URI);
+  await mongoose.connect(MONGO_URI!);
   console.log("✅ Connected to MongoDB\n");
 
   const doctorUsers = await User.find({ role: "DOCTOR" });

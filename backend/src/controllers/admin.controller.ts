@@ -66,7 +66,7 @@ export const getAuditLogsController = async (
       actorUserId?: string;
       actorRole?: UserRole;
       action?: AuditAction;
-      resourceType?: "CONSENT" | "CLINICAL_RECORD";
+     resourceType?: "CONSENT" | "CLINICAL_RECORD" | "CAMP";
       resourceId?: string;
       result?: "SUCCESS" | "DENIED" | "FAILED";
     } = {

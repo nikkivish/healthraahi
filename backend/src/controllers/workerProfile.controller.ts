@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../middleware/errorHandler";
 import { Consent } from "../models/Consent";
@@ -156,8 +157,8 @@ export const getWorkerProfileForDoctor = async (
     });
 
     const latestConsentDoc = await Consent.findOne({
-      workerId: workerIdentity.userId,
-      doctorId: req.user.id,
+      workerId: new mongoose.Types.ObjectId(workerIdentity.userId as string),
+      doctorId: new mongoose.Types.ObjectId(req.user.id),
     }).sort({ createdAt: -1 });
     const latestConsent = latestConsentDoc
       ? {

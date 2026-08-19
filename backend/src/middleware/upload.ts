@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import multer from "multer";
+import { NextFunction } from "express";
 import { AppError } from "../middleware/errorHandler";
 import {
   isAllowedMimeType,
@@ -35,7 +36,7 @@ export function handleMulterError(
   err: unknown,
   _req: Express.Request,
   res: Express.Response,
-  next: Express.NextFunction
+  next: NextFunction
 ): void {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {

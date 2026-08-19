@@ -45,8 +45,7 @@ export async function uploadFile(
 
   return new Promise<UploadResult>((resolve, reject) => {
     const uploadStream = bucket.openUploadStream(fileName, {
-      contentType: mimeType,
-      metadata: { originalName },
+      metadata: { originalName, contentType: mimeType },
     });
 
     const readableStream = new Readable();

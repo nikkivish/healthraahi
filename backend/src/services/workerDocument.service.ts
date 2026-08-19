@@ -49,7 +49,7 @@ export const uploadWorkerDocument = async (
 
   if (!isAllowedFileSize(file.size)) {
     const maxSizeMB = Math.round(
-      (await import("../utils/gridfsStorage")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
+      (await import("../utils/gridfsStorage.js")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
     );
     throw new AppError(`File too large. Maximum size is ${maxSizeMB} MB`, 400);
   }
@@ -66,13 +66,13 @@ export const uploadWorkerDocument = async (
 
   const doc = await WorkerHealthDocument.create({
     workerId: new mongoose.Types.ObjectId(workerId),
-    documentType,
+    documentType: documentType as DocumentType,
     fileName: uploadResult.fileName,
     originalFileName: file.originalname,
     mimeType: uploadResult.mimeType,
     fileSize: uploadResult.fileSize,
     gridfsFileId: uploadResult.fileId,
-    description: description || null,
+    description: description || undefined,
   });
 
   return serializeDocument(doc);

@@ -52,7 +52,7 @@ export const uploadDoctorVerificationDocument = async (
 
   if (!isAllowedFileSize(file.size)) {
     const maxSizeMB = Math.round(
-      (await import("../utils/gridfsStorage")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
+      (await import("../utils/gridfsStorage.js")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
     );
     throw new AppError(`File too large. Maximum size is ${maxSizeMB} MB`, 400);
   }
@@ -145,7 +145,7 @@ export const replaceDoctorVerificationDocument = async (
 
   if (!isAllowedFileSize(file.size)) {
     const maxSizeMB = Math.round(
-      (await import("../utils/gridfsStorage")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
+      (await import("../utils/gridfsStorage.js")).MAX_FILE_SIZE_BYTES / (1024 * 1024)
     );
     throw new AppError(`File too large. Maximum size is ${maxSizeMB} MB`, 400);
   }
