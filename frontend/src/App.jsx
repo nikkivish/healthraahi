@@ -36,6 +36,7 @@ import DoctorCamps from './doctor/DoctorCamps';
 import WorkerCamps from './worker/WorkerCamps';
 import WorkerDocuments from './worker/WorkerDocuments';
 import MedicalCamps from './MedicalCamps';
+import Chatbot from './components/Chatbot';
 import './App.css';
 
 function AuthGuard({ children, allowedRoles }) {
@@ -209,6 +210,7 @@ function AppContent() {
           <Route path="camps" element={<AdminCamps />} />
         </Route>
       </Routes>
+      <Chatbot />
     </div>
   );
 }

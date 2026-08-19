@@ -20,4 +20,6 @@ export const env = {
   msg91AuthKey: process.env.MSG91_AUTH_KEY || "",
   msg91FlowId: process.env.MSG91_FLOW_ID || "",
   msg91SenderId: process.env.MSG91_SENDER_ID || "",
+  groqApiKey: process.env.GROQ_API_KEY || "",
+  groqModel: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
 };

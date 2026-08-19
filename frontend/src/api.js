@@ -440,3 +440,21 @@ export async function downloadClinicalRecordDocument(token, documentId) {
 
   return res;
 }
+
+export function listAiSessions(token) {
+  return request('/ai/sessions', { token, method: 'GET' });
+}
+
+export function createAiSession(token, clinicalRecordId) {
+  const body = {};
+  if (clinicalRecordId) body.clinicalRecordId = clinicalRecordId;
+  return request('/ai/sessions', { token, body });
+}
+
+export function getAiSession(token, sessionId) {
+  return request(`/ai/sessions/${sessionId}`, { token, method: 'GET' });
+}
+
+export function sendAiMessage(token, sessionId, content) {
+  return request(`/ai/sessions/${sessionId}/messages`, { token, body: { content } });
+}
