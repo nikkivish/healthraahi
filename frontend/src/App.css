@@ -517,21 +517,20 @@ img {
 }
 
 @media (max-width: 640px) {
-  .topbar .brand-logo {
-    width: 160px;
-    min-width: 160px;
-    max-width: 160px;
-    height: 40px;
-    min-height: 40px;
-    max-height: 40px;
-    flex: 0 0 160px;
+  .topbar {
+    height: auto;
+    min-height: auto;
+    padding: 10px 14px;
+    gap: 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .topbar .brand-logo img {
-    width: 160px;
-    height: 40px;
-    max-width: 160px;
-    max-height: 40px;
+  .brand-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.15rem;
   }
 
   .nav-links {
@@ -539,8 +538,11 @@ img {
   }
 
   .nav-actions {
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
     justify-content: flex-end;
+    margin-left: auto;
+    gap: 10px;
   }
 
   .language-toggle {
@@ -548,8 +550,16 @@ img {
   }
 
   .login-button {
-    padding: 0.8rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.82rem;
+    border-radius: 10px;
+  }
+
+  .user-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
+    flex-shrink: 0;
   }
 
   .hero {
