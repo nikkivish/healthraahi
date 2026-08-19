@@ -1,9 +1,11 @@
 import app from "./app";
 import { connectDatabase } from "./config/database";
 import { env } from "./config/env";
+import { ensureAdminExists } from "./seed-admin";
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();
+  await ensureAdminExists();
 
   app.listen(env.port, () => {
     console.log(`Server running on port ${env.port} (${env.nodeEnv})`);
