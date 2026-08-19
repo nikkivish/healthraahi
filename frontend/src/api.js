@@ -14,7 +14,7 @@ async function request(endpoint, { body, token, method = "POST" } = {}) {
     res = await fetch(`${API_BASE}${endpoint}`, {
       method,
       headers,
-      body: body ? JSON.parse(JSON.stringify(body)) : undefined,
+      body: body ? JSON.stringify(body) : undefined,
     });
   } catch (fetchErr) {
     const err = new Error(
