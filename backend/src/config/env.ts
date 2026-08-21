@@ -21,5 +21,5 @@ export const env = {
   msg91FlowId: process.env.MSG91_FLOW_ID || "",
   msg91SenderId: process.env.MSG91_SENDER_ID || "",
   groqApiKey: process.env.GROQ_API_KEY || "",
-  groqModel: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+  groqModel: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
 };

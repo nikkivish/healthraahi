@@ -57,7 +57,7 @@ const buildGroqPayload = (
   messages: { role: string; content: string }[],
   systemOverride?: string
 ) => ({
-  model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+  model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
   messages: [
     { role: "system", content: systemOverride || SYSTEM_PROMPT },
     ...messages,
