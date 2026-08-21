@@ -107,9 +107,9 @@ function WorkerConsent() {
           <div key={consent.id} className="consent-card">
             <div className="consent-card-header">
               <div>
-                <div className="consent-requester">{t('worker.consent.doctor')}: {consent.doctorId}</div>
+                <div className="consent-requester">{t('worker.consent.doctor')}: {consent.doctorName || consent.doctorId}{consent.doctorName ? ` (${consent.doctorId})` : ''}</div>
                 {consent.hospitalId && (
-                  <div className="consent-hospital">{t('worker.consent.hospital')}: {consent.hospitalId}</div>
+                  <div className="consent-hospital">{t('worker.consent.hospital')}: {consent.hospitalName || consent.hospitalId}</div>
                 )}
               </div>
               <span className={`consent-status ${consent.status.toLowerCase()}`}>

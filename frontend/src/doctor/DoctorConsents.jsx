@@ -88,9 +88,9 @@ function DoctorConsents() {
           <div key={consent.id} className="consent-card">
             <div className="consent-card-header">
               <div>
-                <div className="consent-requester">{t('doctor.consents.worker')}: {consent.workerId}</div>
+                <div className="consent-requester">{t('doctor.consents.worker')}: {consent.workerName || consent.workerId}{consent.workerName ? ` (${consent.workerId})` : ''}</div>
                 {consent.hospitalId && (
-                  <div className="consent-hospital">{t('doctor.consents.hospital')}: {consent.hospitalId}</div>
+                  <div className="consent-hospital">{t('doctor.consents.hospital')}: {consent.hospitalName || consent.hospitalId}</div>
                 )}
               </div>
               <span className={`consent-status ${consent.status.toLowerCase()}`}>

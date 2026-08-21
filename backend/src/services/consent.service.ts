@@ -16,7 +16,10 @@ export interface ConsentRequestInput {
   notes?: string;
 }
 
-export const serializeConsent = (consent: IConsent) => ({
+export const serializeConsent = (
+  consent: IConsent,
+  names?: { workerName?: string; doctorName?: string; hospitalName?: string }
+) => ({
   id: consent._id.toString(),
   workerId: consent.workerId.toString(),
   doctorId: consent.doctorId.toString(),
@@ -29,6 +32,9 @@ export const serializeConsent = (consent: IConsent) => ({
   ...(consent.notes ? { notes: consent.notes } : {}),
   createdAt: consent.createdAt,
   updatedAt: consent.updatedAt,
+  ...(names?.workerName ? { workerName: names.workerName } : {}),
+  ...(names?.doctorName ? { doctorName: names.doctorName } : {}),
+  ...(names?.hospitalName ? { hospitalName: names.hospitalName } : {}),
 });
 
 const normalizeCategories = (categories: unknown): string[] => {
@@ -155,12 +161,66 @@ export const getConsentById = async (consentId: string) => {
 
 export const getWorkerConsents = async (workerId: string) => {
   const consents = await Consent.find({ workerId }).sort({ createdAt: -1 });
-  return consents.map((consent) => serializeConsent(consent));
+
+  const doctorIds = [...new Set(consents.map((c) => c.doctorId.toString()))];
+  const hospitalIds = [
+    ...new Set(
+      consents.filter((c) => c.hospitalId).map((c) => c.hospitalId!.toString())
+    ),
+  ];
+
+  const [doctors, hospitals] = await Promise.all([
+    doctorIds.length
+      ? User.find({ _id: { $in: doctorIds } }, { name: 1 }).lean()
+      : [],
+    hospitalIds.length
+      ? Hospital.find({ _id: { $in: hospitalIds } }, { name: 1 }).lean()
+      : [],
+  ]);
+
+  const doctorMap = new Map(doctors.map((d) => [d._id.toString(), d.name]));
+  const hospitalMap = new Map(hospitals.map((h) => [h._id.toString(), h.name]));
+
+  return consents.map((consent) =>
+    serializeConsent(consent, {
+      doctorName: doctorMap.get(consent.doctorId.toString()),
+      hospitalName: consent.hospitalId
+        ? hospitalMap.get(consent.hospitalId.toString())
+        : undefined,
+    })
+  );
 };
 
 export const getDoctorConsents = async (doctorId: string) => {
   const consents = await Consent.find({ doctorId }).sort({ createdAt: -1 });
-  return consents.map((consent) => serializeConsent(consent));
+
+  const workerIds = [...new Set(consents.map((c) => c.workerId.toString()))];
+  const hospitalIds = [
+    ...new Set(
+      consents.filter((c) => c.hospitalId).map((c) => c.hospitalId!.toString())
+    ),
+  ];
+
+  const [workers, hospitals] = await Promise.all([
+    workerIds.length
+      ? User.find({ _id: { $in: workerIds } }, { name: 1 }).lean()
+      : [],
+    hospitalIds.length
+      ? Hospital.find({ _id: { $in: hospitalIds } }, { name: 1 }).lean()
+      : [],
+  ]);
+
+  const workerMap = new Map(workers.map((w) => [w._id.toString(), w.name]));
+  const hospitalMap = new Map(hospitals.map((h) => [h._id.toString(), h.name]));
+
+  return consents.map((consent) =>
+    serializeConsent(consent, {
+      workerName: workerMap.get(consent.workerId.toString()),
+      hospitalName: consent.hospitalId
+        ? hospitalMap.get(consent.hospitalId.toString())
+        : undefined,
+    })
+  );
 };
 
 export const isConsentActiveForAccess = async ({
