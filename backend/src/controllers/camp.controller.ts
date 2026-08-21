@@ -14,12 +14,6 @@ import {
   assignDoctorToCamp,
   adminListCampRegistrations,
 } from "../services/camp.service";
-import {
-  isSmsConfigured,
-  getSmsDiagnostics,
-  sendCampCreationSms,
-} from "../services/sms.service";
-import { MedicalCamp } from "../models/MedicalCamp";
 
 const normalizeString = (value: unknown): string | undefined => {
   if (Array.isArray(value)) {
@@ -480,94 +474,6 @@ export const adminListCampRegistrationsController = async (
       success: true,
       message: "Camp registrations retrieved successfully",
       data: { registrations },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// ─── Admin: SMS diagnostic status ────────────────────────────────────────────
-
-export const campSmsStatusController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    if (!req.user) {
-      res
-        .status(401)
-        .json({ success: false, message: "Authentication required" });
-      return;
-    }
-
-    if (req.user.role !== "ADMIN") {
-      res
-        .status(403)
-        .json({ success: false, message: "Admin access required" });
-      return;
-    }
-
-    const diagnostics = await getSmsDiagnostics();
-    res.status(200).json({
-      success: true,
-      message: "SMS status retrieved successfully",
-      data: diagnostics,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// ─── Admin: Resend SMS for a camp ────────────────────────────────────────────
-
-export const resendCampSmsController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    if (!req.user) {
-      res
-        .status(401)
-        .json({ success: false, message: "Authentication required" });
-      return;
-    }
-
-    if (req.user.role !== "ADMIN") {
-      res
-        .status(403)
-        .json({ success: false, message: "Admin access required" });
-      return;
-    }
-
-    if (!isSmsConfigured()) {
-      res.status(400).json({
-        success: false,
-        message: "MSG91 SMS provider is not configured. Please set MSG91_AUTH_KEY, MSG91_FLOW_ID, and MSG91_SENDER_ID environment variables.",
-      });
-      return;
-    }
-
-    const campId = normalizeString(req.params.campId);
-    if (!campId) {
-      throw new AppError("Camp ID is required", 400);
-    }
-
-    const camp = await MedicalCamp.findById(campId);
-    if (!camp) {
-      throw new AppError("Camp not found", 404);
-    }
-
-    const smsResult = await sendCampCreationSms(camp);
-
-    res.status(200).json({
-      success: true,
-      message: "SMS batch triggered",
-      data: {
-        campName: camp.name,
-        smsResult,
-      },
     });
   } catch (error) {
     next(error);
