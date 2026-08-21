@@ -89,6 +89,41 @@ async function sendSingleSms(
   }
 }
 
+export function isSmsConfigured(): boolean {
+  return isMsg91Configured();
+}
+
+export async function getSmsDiagnostics(): Promise<{
+  configured: boolean;
+  activeWorkerCount: number;
+  activeWorkerWithPhone: number;
+  recentSent: number;
+  recentFailed: number;
+}> {
+  const configured = isMsg91Configured();
+  const activeWorkerCount = await User.countDocuments({ role: "WORKER", isActive: true });
+  const workersWithPhone = await User.find({ role: "WORKER", isActive: true })
+    .select("phone")
+    .lean();
+  const activeWorkerWithPhone = workersWithPhone.filter(
+    (w) => w.phone && w.phone.trim().length > 0
+  ).length;
+
+  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [recentSent, recentFailed] = await Promise.all([
+    CampSmsLog.countDocuments({ status: "SENT", createdAt: { $gte: oneWeekAgo } }),
+    CampSmsLog.countDocuments({ status: "FAILED", createdAt: { $gte: oneWeekAgo } }),
+  ]);
+
+  return {
+    configured,
+    activeWorkerCount,
+    activeWorkerWithPhone,
+    recentSent,
+    recentFailed,
+  };
+}
+
 export async function sendCampCreationSms(camp: {
   _id: any;
   name: string;
@@ -108,18 +143,26 @@ export async function sendCampCreationSms(camp: {
 
   if (!isMsg91Configured()) {
     console.warn(
-      "[SMS] MSG91 not configured. Skipping camp creation SMS."
+      "[SMS] MSG91 not configured (MSG91_AUTH_KEY=%s, MSG91_FLOW_ID=%s, MSG91_SENDER_ID=%s). Skipping camp creation SMS.",
+      process.env.MSG91_AUTH_KEY ? "set" : "missing",
+      process.env.MSG91_FLOW_ID ? "set" : "missing",
+      process.env.MSG91_SENDER_ID ? "set" : "missing"
     );
     result.skippedMissingConfig = 1;
     return result;
   }
 
+  console.log("[SMS] MSG91 configured. Starting camp SMS batch for camp: %s", camp.name);
+
   const workers = await fetchEligibleWorkers();
   result.totalWorkers = workers.length;
 
   if (workers.length === 0) {
+    console.log("[SMS] No active workers with phone numbers found. Skipping SMS batch.");
     return result;
   }
+
+  console.log("[SMS] Found %d eligible workers for camp '%s'", workers.length, camp.name);
 
   const campDateStr = camp.date.toLocaleDateString("en-IN", {
     day: "numeric",
@@ -185,6 +228,14 @@ export async function sendCampCreationSms(camp: {
       }
     }
   }
+
+  console.log(
+    "[SMS] Camp SMS batch complete for '%s': sent=%d, failed=%d, skippedAlreadySent=%d",
+    camp.name,
+    result.sent,
+    result.failed,
+    result.skippedAlreadySent
+  );
 
   return result;
 }

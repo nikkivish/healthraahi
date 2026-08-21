@@ -12,6 +12,8 @@ import {
   cancelCampController,
   assignDoctorToCampController,
   adminListCampRegistrationsController,
+  campSmsStatusController,
+  resendCampSmsController,
 } from "../controllers/camp.controller";
 import { authenticate } from "../middleware/authenticate";
 import { requireRole } from "../middleware/requireRole";
@@ -32,6 +34,20 @@ router.post(
   authenticate,
   requireRole("ADMIN"),
   createCampController
+);
+
+router.get(
+  "/admin/sms-status",
+  authenticate,
+  requireRole("ADMIN"),
+  campSmsStatusController
+);
+
+router.post(
+  "/admin/:campId/resend-sms",
+  authenticate,
+  requireRole("ADMIN"),
+  resendCampSmsController
 );
 
 router.patch(
