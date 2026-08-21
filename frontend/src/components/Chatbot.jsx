@@ -5,6 +5,8 @@ import {
   createAiSession,
   getAiSession,
   sendAiMessage,
+  listAnalyzableDocuments,
+  analyzeAiDocument,
 } from '../api';
 
 const ROLE_CONFIG = {
@@ -33,6 +35,13 @@ const ROLE_CONFIG = {
   },
 };
 
+const ANALYSIS_ACTIONS = [
+  { key: 'analyze', label: 'Analyze this report' },
+  { key: 'abnormal', label: 'Explain abnormal values' },
+  { key: 'summarize', label: 'Summarize report' },
+  { key: 'questions', label: 'What should I discuss with my doctor?' },
+];
+
 const DISCLAIMER = 'Responses are for informational assistance only and do not constitute medical advice.';
 
 function TypingIndicator() {
@@ -43,6 +52,13 @@ function TypingIndicator() {
       <span className="chatbot-typing-dot" />
     </div>
   );
+}
+
+function formatFileSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
 export default function Chatbot() {
@@ -59,6 +75,13 @@ export default function Chatbot() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const hasLoaded = useRef(false);
+
+  const [showDocPanel, setShowDocPanel] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [docsError, setDocsError] = useState('');
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [analyzingAction, setAnalyzingAction] = useState(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -132,6 +155,8 @@ export default function Chatbot() {
   const handleClose = () => {
     setIsOpen(false);
     hasLoaded.current = false;
+    setShowDocPanel(false);
+    setSelectedDoc(null);
   };
 
   const handleSend = async (text) => {
@@ -188,6 +213,83 @@ export default function Chatbot() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleToggleDocPanel = async () => {
+    if (showDocPanel) {
+      setShowDocPanel(false);
+      setSelectedDoc(null);
+      return;
+    }
+
+    setShowDocPanel(true);
+    setSelectedDoc(null);
+    setDocsError('');
+
+    if (documents.length > 0) return;
+
+    setDocsLoading(true);
+    try {
+      const res = await listAnalyzableDocuments(token, isDoctor ? user?.workerId : undefined);
+      setDocuments(res.data?.documents || []);
+    } catch (err) {
+      setDocsError(err.message || 'Failed to load documents.');
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  const handleSelectDoc = (doc) => {
+    setSelectedDoc(doc);
+  };
+
+  const handleAnalyzeAction = async (action) => {
+    if (!selectedDoc || analyzingAction) return;
+
+    const actionLabel = ANALYSIS_ACTIONS.find((a) => a.key === action)?.label || action;
+    setAnalyzingAction(action);
+    setShowDocPanel(false);
+
+    const userMsg = `📄 ${actionLabel}: ${selectedDoc.fileName}`;
+    setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    setIsTyping(true);
+    setError('');
+
+    try {
+      const res = await analyzeAiDocument(
+        token,
+        selectedDoc.id,
+        action,
+        isDoctor ? user?.workerId : undefined
+      );
+
+      const result = res.data;
+      let reply = result.analysis || 'No analysis could be generated for this document.';
+
+      if (result.imageNote) {
+        reply += `\n\nℹ️ ${result.imageNote}`;
+      }
+
+      reply += '\n\n⚕️ This is AI-generated information for reference only. Please consult a healthcare professional for medical advice.';
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+    } catch (err) {
+      if (err.status === 401) {
+        setError('Your session expired. Please log in again.');
+      } else if (!navigator.onLine) {
+        setError('You are offline. Please check your connection.');
+      } else {
+        setError(err.message || 'Failed to analyze document. Please try again.');
+      }
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Sorry, I could not analyze this document. Please try again later.' },
+      ]);
+    } finally {
+      setIsTyping(false);
+      setAnalyzingAction(null);
+      setSelectedDoc(null);
     }
   };
 
@@ -259,11 +361,93 @@ export default function Chatbot() {
               <div ref={messagesEndRef} />
             </div>
 
+            {showDocPanel && (
+              <div className="chatbot-doc-panel">
+                {selectedDoc ? (
+                  <div className="chatbot-doc-actions">
+                    <div className="chatbot-doc-actions-header">
+                      <span className="chatbot-doc-actions-title">{selectedDoc.fileName}</span>
+                      <button
+                        className="chatbot-doc-back"
+                        type="button"
+                        onClick={() => setSelectedDoc(null)}
+                      >
+                        ← Back
+                      </button>
+                    </div>
+                    <div className="chatbot-doc-actions-list">
+                      {ANALYSIS_ACTIONS.map((action) => (
+                        <button
+                          key={action.key}
+                          className="chatbot-doc-action-btn"
+                          type="button"
+                          onClick={() => handleAnalyzeAction(action.key)}
+                          disabled={!!analyzingAction}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="chatbot-doc-list">
+                    <div className="chatbot-doc-list-header">
+                      <span className="chatbot-doc-list-title">
+                        {isDoctor ? 'Select a report to analyze' : 'Your uploaded reports'}
+                      </span>
+                      <button
+                        className="chatbot-doc-close"
+                        type="button"
+                        onClick={() => { setShowDocPanel(false); setSelectedDoc(null); }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    {docsLoading && (
+                      <div className="chatbot-doc-loading">
+                        <TypingIndicator />
+                        <span>Loading documents...</span>
+                      </div>
+                    )}
+                    {!docsLoading && docsError && (
+                      <div className="chatbot-doc-error">{docsError}</div>
+                    )}
+                    {!docsLoading && !docsError && documents.length === 0 && (
+                      <div className="chatbot-doc-empty">
+                        No PDF or image reports found. Upload a medical report to analyze it.
+                      </div>
+                    )}
+                    {!docsLoading && !docsError && documents.length > 0 && (
+                      <div className="chatbot-doc-items">
+                        {documents.map((doc) => (
+                          <button
+                            key={doc.id}
+                            className="chatbot-doc-item"
+                            type="button"
+                            onClick={() => handleSelectDoc(doc)}
+                          >
+                            <div className="chatbot-doc-item-info">
+                              <span className="chatbot-doc-item-name">{doc.fileName}</span>
+                              <span className="chatbot-doc-item-meta">
+                                {doc.documentType ? `${doc.documentType.replace(/_/g, ' ').toLowerCase()} · ` : ''}
+                                {formatFileSize(doc.fileSize)}
+                              </span>
+                            </div>
+                            <span className="chatbot-doc-item-arrow">›</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {error && messages.length > 0 && (
               <div className="chatbot-error-inline">{error}</div>
             )}
 
-            {!isLoading && messages.length <= 2 && (
+            {!isLoading && !showDocPanel && messages.length <= 2 && (
               <div className="chatbot-quick">
                 <div className="chatbot-quick-label">Quick questions</div>
                 <div className="chatbot-quick-list">
@@ -283,6 +467,16 @@ export default function Chatbot() {
             )}
 
             <div className="chatbot-input-bar">
+              <button
+                className="chatbot-doc-toggle"
+                type="button"
+                aria-label="Analyze a report"
+                onClick={handleToggleDocPanel}
+                disabled={isTyping || isLoading}
+                title="Analyze a medical report"
+              >
+                📄
+              </button>
               <input
                 ref={inputRef}
                 className="chatbot-input"

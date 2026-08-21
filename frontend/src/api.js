@@ -594,3 +594,14 @@ export function sendAiMessage(token, sessionId, content) {
     body: { content },
   });
 }
+
+export function listAnalyzableDocuments(token, workerId) {
+  const params = workerId ? `?workerId=${encodeURIComponent(workerId)}` : "";
+  return request(`/ai/documents/list${params}`, { token, method: "GET" });
+}
+
+export function analyzeAiDocument(token, documentId, action, workerId) {
+  const body = { documentId, action: action || "analyze" };
+  if (workerId) body.workerId = workerId;
+  return request("/ai/analyze-document", { token, body });
+}
