@@ -323,11 +323,14 @@ describe("AI Health Assistant", () => {
       const { token } = await createWorker();
       const session = await createSession(token);
 
-      (global.fetch as any).mockResolvedValueOnce({
+      const mockErrorResponse = {
         ok: false,
         status: 500,
         text: async () => "Internal Server Error",
-      });
+      };
+      (global.fetch as any)
+        .mockResolvedValueOnce(mockErrorResponse)
+        .mockResolvedValueOnce(mockErrorResponse);
 
       const res = await request(app)
         .post(`/api/ai/sessions/${session.id}/messages`)
@@ -360,9 +363,10 @@ describe("AI Health Assistant", () => {
       const { token } = await createWorker();
       const session = await createSession(token);
 
-      (global.fetch as any).mockRejectedValueOnce(
-        Object.assign(new Error("Aborted"), { name: "AbortError" })
-      );
+      const abortError = Object.assign(new Error("Aborted"), { name: "AbortError" });
+      (global.fetch as any)
+        .mockRejectedValueOnce(abortError)
+        .mockRejectedValueOnce(abortError);
 
       const res = await request(app)
         .post(`/api/ai/sessions/${session.id}/messages`)

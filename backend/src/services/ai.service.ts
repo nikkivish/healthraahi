@@ -7,7 +7,8 @@ import { DoctorProfile } from "../models/DoctorProfile";
 import { User } from "../models/User";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const REQUEST_TIMEOUT_MS = 30_000;
+const GROQ_REQUEST_TIMEOUT_MS = 20_000;
+const MAX_RETRIES = 1;
 
 const SYSTEM_PROMPT = `You are HealthRaahi AI Assistant, an informational health assistant for migrant workers and doctors in India.
 
@@ -170,42 +171,72 @@ const callGroqApi = async (
     throw new AppError("AI service is not configured. Please contact the administrator.", 503);
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let lastError: unknown;
 
-  try {
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: buildGroqHeaders(),
-      body: JSON.stringify(buildGroqPayload(messages, systemOverride)),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => "");
-      console.error(`Groq API error ${response.status}:`, errorBody);
-      throw new AppError("AI service is temporarily unavailable. Please try again later.", 502);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      const delayMs = attempt * 1_000;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      console.log(`[ai] Retrying Groq call (attempt ${attempt + 1}/${MAX_RETRIES + 1})`);
     }
 
-    const data = await response.json();
-    const reply = extractAssistantReply(data);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GROQ_REQUEST_TIMEOUT_MS);
 
-    if (!reply) {
-      console.error("Groq returned empty response:", JSON.stringify(data));
-      throw new AppError("AI service returned an empty response. Please try again.", 502);
-    }
+    try {
+      const response = await fetch(GROQ_API_URL, {
+        method: "POST",
+        headers: buildGroqHeaders(),
+        body: JSON.stringify(buildGroqPayload(messages, systemOverride)),
+        signal: controller.signal,
+      });
 
-    return reply;
-  } catch (error: any) {
-    if (error instanceof AppError) throw error;
-    if (error.name === "AbortError") {
-      throw new AppError("AI service timed out. Please try again.", 504);
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => "");
+        console.error(`[ai] Groq API HTTP ${response.status} (attempt ${attempt + 1}):`, errorBody.slice(0, 200));
+
+        if (response.status === 401) {
+          throw new AppError("AI service authentication failed. Please contact the administrator.", 503);
+        }
+        if (response.status === 400) {
+          throw new AppError("AI service rejected the request. Please try a shorter message.", 400);
+        }
+
+        lastError = new AppError("AI service is temporarily unavailable. Please try again later.", 502);
+        continue;
+      }
+
+      const data = await response.json();
+      const reply = extractAssistantReply(data);
+
+      if (!reply) {
+        console.error("[ai] Groq returned empty response:", JSON.stringify(data).slice(0, 200));
+        throw new AppError("AI service returned an empty response. Please try again.", 502);
+      }
+
+      return reply;
+    } catch (error: unknown) {
+      clearTimeout(timeout);
+
+      if (error instanceof AppError) throw error;
+
+      const errName = (error as Error)?.name ?? "";
+      const errMsg = (error as Error)?.message ?? "";
+
+      if (errName === "AbortError") {
+        console.error(`[ai] Groq request timed out after ${GROQ_REQUEST_TIMEOUT_MS}ms (attempt ${attempt + 1})`);
+        lastError = new AppError("AI service took too long to respond. Please try a shorter message.", 504);
+        continue;
+      }
+
+      console.error(`[ai] Groq fetch failed (attempt ${attempt + 1}):`, errMsg);
+      lastError = new AppError("AI service is temporarily unavailable. Please try again later.", 502);
     }
-    console.error("Groq API call failed:", error.message || error);
-    throw new AppError("AI service is temporarily unavailable. Please try again later.", 502);
-  } finally {
-    clearTimeout(timeout);
   }
+
+  throw lastError;
 };
 
 const serializeSession = (session: any) => ({
