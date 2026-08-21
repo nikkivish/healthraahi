@@ -226,8 +226,7 @@ export default function Chatbot() {
     setShowDocPanel(true);
     setSelectedDoc(null);
     setDocsError('');
-
-    if (documents.length > 0) return;
+    setDocuments([]);
 
     setDocsLoading(true);
     try {
