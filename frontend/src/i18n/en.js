@@ -39,6 +39,43 @@ const en = {
     medicalCampsTitle: "Medical Camps",
     medicalCampsDesc:
       "HealthRaahi powers on-ground medical camps in collaboration with local hospitals and NGOs. Workers can get screened, vaccinated, and have records updated instantly at any registered camp location.",
+    aboutStat1: "Digital Records",
+    aboutStat2Val: "24/7",
+    aboutStat2: "Access Anywhere",
+    aboutStat3Val: "100%",
+    aboutStat3: "Consent-Based",
+    aboutDetail:
+      "HealthRaahi connects migrant workers with a portable digital health identity. Your medical history follows you across state lines, ensuring continuity of care whether you are in Mumbai, Delhi, or your home village.",
+    showLess: "Show Less",
+    step1Title: "Register",
+    step1Desc:
+      "Sign up with your phone number. No documents needed to start — just your phone and a password.",
+    step2Title: "Get Health ID",
+    step2Desc:
+      "Receive a unique Health ID linked to your profile. This ID is recognized across all registered hospitals and camps.",
+    step3Title: "Access Records",
+    step3Desc:
+      "Doctors can view your history with your consent. You control who sees your data, and you can revoke access at any time.",
+    serviceRecordsTitle: "Medical Records",
+    serviceRecordsDesc: "View and manage your digital health history.",
+    serviceAiAssistantTitle: "AI Health Assistant",
+    serviceAiAssistantDesc: "Ask health questions and get AI-powered guidance.",
+    serviceCampsTitle: "Medical Camps",
+    serviceCampsDesc: "Find and register for free health camps near you.",
+    serviceConsentTitle: "Consent Management",
+    serviceConsentDesc: "Control who accesses your health records.",
+    serviceDocumentsTitle: "Health Documents",
+    serviceDocumentsDesc: "Upload and store prescriptions, reports, and more.",
+    serviceSchemesTitle: "Government Schemes",
+    serviceSchemesDesc: "Check eligibility for Ayushman Bharat and other schemes.",
+    eligibility: "Eligibility",
+    visitOfficial: "Visit Official Website",
+    findEligibleSchemes: "Find Eligible Schemes",
+    checkerDesc:
+      "Register with HealthRaahi to check your eligibility for government health schemes. Your digital identity streamlines applications and access.",
+    registerToCheck: "Register to Check Eligibility",
+    loginToCheck: "Already registered? Login",
+    campsLoadError: "Unable to load camps. Please try again later.",
   },
   auth: {
     loginTitle: "Login",

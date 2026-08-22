@@ -4837,3 +4837,530 @@ img {
 .chatbot-fab-label {
   white-space: nowrap;
 }
+
+/* ==============================
+   Landing Sections – Enhanced
+   ============================== */
+
+.section-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+/* ── About section expand/collapse ──────────────────────────────────── */
+
+.about-expanded {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s ease, opacity 0.35s ease;
+  opacity: 0;
+}
+
+.about-expanded.open {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.about-details {
+  padding-top: 16px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.about-stat {
+  text-align: center;
+  padding: 18px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.about-stat strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--teal);
+  margin-bottom: 4px;
+}
+
+.about-stat span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.about-detail-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+
+.about-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--teal);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.about-toggle-btn:hover {
+  background: var(--teal-soft);
+  border-color: rgba(13, 126, 125, 0.2);
+}
+
+.toggle-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.toggle-arrow.up {
+  transform: rotate(180deg);
+}
+
+/* ── How It Works (3-step track) ────────────────────────────────────── */
+
+.hiw-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 28px;
+  position: relative;
+}
+
+.hiw-connector {
+  position: absolute;
+  top: 36px;
+  left: 60px;
+  right: 60px;
+  height: 2px;
+  background: rgba(13, 126, 125, 0.15);
+  z-index: 0;
+}
+
+.hiw-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 12px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.hiw-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+.hiw-step:hover .hiw-circle,
+.hiw-step.active .hiw-circle {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(13, 126, 125, 0.15);
+}
+
+.hiw-number {
+  margin-top: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--teal-soft);
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.hiw-step.active .hiw-number {
+  background: var(--teal);
+  color: #fff;
+}
+
+.hiw-label {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: color 0.2s ease;
+}
+
+.hiw-step:hover .hiw-label,
+.hiw-step.active .hiw-label {
+  color: var(--teal);
+}
+
+.hiw-detail {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+.hiw-step.active .hiw-detail {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.hiw-detail p {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+  padding: 0 8px;
+}
+
+/* ── Healthcare Services grid ───────────────────────────────────────── */
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+  border-color: rgba(13, 126, 125, 0.25);
+}
+
+.service-card.active {
+  border-color: var(--teal);
+}
+
+.service-icon {
+  font-size: 1.8rem;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: var(--teal-soft);
+  border-radius: 12px;
+}
+
+.service-card strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.service-card span {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.service-arrow {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  font-size: 1.1rem;
+  color: var(--teal);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.25s ease;
+}
+
+.service-card:hover .service-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Government Schemes ─────────────────────────────────────────────── */
+
+.schemes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.scheme-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.scheme-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+  border-color: rgba(13, 126, 125, 0.2);
+}
+
+.scheme-header h4 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.scheme-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.scheme-eligibility {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+  padding: 10px 12px;
+  background: var(--panel-bg);
+  border-radius: 8px;
+}
+
+.scheme-eligibility strong {
+  color: var(--text);
+}
+
+.scheme-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+  margin-top: auto;
+  transition: color 0.2s ease;
+}
+
+.scheme-link:hover {
+  color: var(--teal-dark);
+}
+
+.schemes-checker {
+  margin-top: 32px;
+  padding: 28px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.schemes-checker h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.schemes-checker p {
+  margin: 0 0 18px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.checker-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checker-btn {
+  text-decoration: none;
+  display: inline-flex;
+}
+
+/* ── Medical Camps loading / empty states ────────────────────────────── */
+
+.home-camps-loading {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.camp-skeleton {
+  height: 220px;
+  background: linear-gradient(110deg, var(--panel-bg) 25%, rgba(255,255,255,0.6) 37%, var(--panel-bg) 63%);
+  background-size: 400% 100%;
+  animation: campSkeletonShimmer 1.6s ease-in-out infinite;
+  border-radius: 14px;
+}
+
+@keyframes campSkeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.home-camps-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+
+.home-camps-empty .camps-empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.home-camps-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.home-camp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.home-camp-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-icon {
+  font-size: 0.85rem;
+}
+
+/* ── Landing sections responsive ─────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .about-grid,
+  .services-grid,
+  .schemes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-camps-loading {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .about-grid,
+  .services-grid,
+  .schemes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-camps-loading {
+    grid-template-columns: 1fr;
+  }
+
+  .hiw-track {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .hiw-connector {
+    display: none;
+  }
+
+  .hiw-step {
+    flex-direction: row;
+    text-align: left;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .hiw-number {
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .hiw-label {
+    margin-top: 0;
+  }
+
+  .hiw-detail {
+    margin-top: 0;
+  }
+
+  .hiw-step.active .hiw-detail {
+    margin-top: 6px;
+  }
+
+  .hiw-step .hiw-detail {
+    display: none;
+  }
+
+  .hiw-step.active .hiw-detail {
+    display: block;
+    max-height: 200px;
+    opacity: 1;
+  }
+
+  .hiw-step {
+    flex-direction: column;
+    text-align: center;
+    max-width: 320px;
+  }
+
+  .hiw-step .hiw-detail {
+    display: block;
+  }
+
+  .checker-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checker-btn {
+    justify-content: center;
+  }
+}
