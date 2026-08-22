@@ -22,6 +22,7 @@ import DoctorWorkerProfile from './doctor/DoctorWorkerProfile';
 import DoctorConsents from './doctor/DoctorConsents';
 import DoctorRecords from './doctor/DoctorRecords';
 import DoctorRecordDetail from './doctor/DoctorRecordDetail';
+import DoctorAccess from './doctor/DoctorAccess';
 import WorkerRecordDetail from './worker/WorkerRecordDetail';
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
@@ -193,6 +194,7 @@ function AppContent() {
           <Route path="records" element={<DoctorRecords />} />
           <Route path="records/:recordId" element={<DoctorRecordDetail />} />
           <Route path="camps" element={<DoctorCamps />} />
+          <Route path="access" element={<DoctorAccess />} />
         </Route>
         <Route path="/admin" element={
           <AuthGuard allowedRoles={['ADMIN']}>

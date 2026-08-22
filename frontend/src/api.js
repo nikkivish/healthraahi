@@ -162,6 +162,13 @@ export function getWorkerProfileForDoctor(token, healthId) {
   });
 }
 
+export function verifyWorkerAccess(token, healthId) {
+  return request(`/workers/verify-access/${encodeURIComponent(healthId)}`, {
+    token,
+    method: "POST",
+  });
+}
+
 export function getHospital(token, hospitalId) {
   return request(`/hospitals/${hospitalId}`, { token, method: "GET" });
 }

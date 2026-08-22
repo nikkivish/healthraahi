@@ -15,6 +15,7 @@ function DoctorLayout() {
     { to: '/doctor/verification', label: t('doctor.dashboard.verification'), icon: '✓' },
     { to: '/doctor/hospital', label: t('doctor.dashboard.hospital'), icon: '⊕' },
     { to: '/doctor/workers', label: t('doctor.dashboard.workers'), icon: '☰' },
+    { to: '/doctor/access', label: t('doctor.dashboard.workerAccess') || 'Worker Access', icon: '🔍' },
     { to: '/doctor/consents', label: t('doctor.dashboard.consentRequests'), icon: '◈' },
     { to: '/doctor/records', label: t('doctor.dashboard.clinicalRecords'), icon: '⊞' },
     { to: '/doctor/camps', label: t('camps.doctorCamps'), icon: '🏥' },

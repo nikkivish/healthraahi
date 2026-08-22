@@ -252,6 +252,8 @@ const hi = {
       myProfileDesc: "अपनी प्रोफ़ाइल देखें और संपादित करें",
       workers: "कामगार",
       workersDesc: "कामगार अभिलेख प्रबंधित करें",
+      workerAccess: "कामगार पहुँच",
+      workerAccessDesc: "अभिलेख पहुँच के लिए कामगारों को खोजें और सत्यापित करें",
       consentRequests: "सहमति अनुरोध",
       consentRequestsDesc: "एक्सेस अनुरोधों की समीक्षा करें",
       clinicalRecords: "क्लिनिकल अभिलेख",

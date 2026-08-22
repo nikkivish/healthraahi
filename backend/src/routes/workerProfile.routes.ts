@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { verifyWorkerAccess } from "../controllers/workerAccess.controller";
 import {
   createWorkerProfile,
   getWorkerProfile,
@@ -53,6 +54,14 @@ router.get(
   authenticate,
   requireRole("DOCTOR", "ADMIN"),
   lookupWorkerIdentityByHealthId
+);
+
+router.post(
+  "/verify-access/:healthId",
+  authenticate,
+  requireRole("DOCTOR"),
+  requireVerifiedDoctor,
+  verifyWorkerAccess
 );
 
 export default router;

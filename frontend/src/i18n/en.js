@@ -289,6 +289,8 @@ const en = {
       myProfileDesc: "View and edit your profile",
       workers: "Workers",
       workersDesc: "Manage worker records",
+      workerAccess: "Worker Access",
+      workerAccessDesc: "Search and verify workers for record access",
       consentRequests: "Consent Requests",
       consentRequestsDesc: "Review access requests",
       clinicalRecords: "Clinical Records",
