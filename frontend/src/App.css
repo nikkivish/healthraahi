@@ -5368,6 +5368,8 @@ img {
 /* ── Redesigned Sections (rs- prefix) ────────────────────────────── */
 
 .rs-section {
+  grid-column: 1 / -1;
+  width: 100%;
   padding: 64px 36px;
   border-top: 3px solid var(--teal);
   opacity: 0;
